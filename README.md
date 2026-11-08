@@ -1,5 +1,7 @@
 # Sistem Perpustakaan Demo
 
+**English** · [Bahasa Indonesia](README.id.md)
+
 A PHP and MySQL/MariaDB library app with a public catalogue and staff workflows for books, members, loans, returns, and fines.
 
 ## GitHub Pages demo
