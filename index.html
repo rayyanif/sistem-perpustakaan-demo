@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demo Katalog | Perpustakaan Terpadu</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .page-toolbar { grid-column: 1 / -1; }
+        .catalogue-filter[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--paper); font-weight: 700; }
+        .demo-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .demo-table { min-width: 30rem; }
+        @media (forced-colors: active) {
+            .catalogue-filter[aria-pressed="true"]:not(:focus-visible) { outline: 1px solid Highlight; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Langsung ke konten</a>
+    <header class="site-header site-header-searchable">
+        <div class="header-inner">
+            <div class="wordmark">Perpustakaan<span class="wordmark-caption">Demo katalog dengan data contoh</span></div>
+            <div class="page-toolbar">
+                <form class="toolbar-search" role="search" id="demo-search">
+                    <button class="toolbar-search-button" type="submit" aria-label="Cari" disabled>Cari</button>
+                    <input type="search" id="search" aria-label="Cari judul atau topik" placeholder="Cari judul atau topik…" disabled>
+                </form>
+                <div class="catalogue-filters" role="group" aria-label="Ketersediaan buku">
+                    <button type="button" class="catalogue-filter" data-filter="all" aria-pressed="true" disabled>Semua</button>
+                    <button type="button" class="catalogue-filter" data-filter="available" aria-pressed="false" disabled>Tersedia</button>
+                    <button type="button" class="catalogue-filter" data-filter="borrowed" aria-pressed="false" disabled>Dipinjam</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="container" id="main-content" tabindex="-1">
+        <div class="page-heading">
+            <h1>Demo katalog buku</h1>
+            <p class="page-description">Coba pencarian dan filter dengan data contoh. Untuk masuk sebagai petugas dan mencatat peminjaman, jalankan aplikasi PHP di XAMPP dan impor skema SQL ke database Anda sendiri.</p>
+            <div class="demo-links">
+                <a class="btn btn-primary" href="https://github.com/rayyanif/sistem-perpustakaan-demo#run-the-full-app-with-xampp">Panduan menjalankan aplikasi</a>
+                <a class="btn btn-secondary" href="schema.sql" download>Unduh skema SQL</a>
+            </div>
+        </div>
+        <section class="card" aria-labelledby="demo-books">
+            <div class="register-header">
+                <h2 id="demo-books">Buku contoh</h2>
+                <p class="result-count" role="status" id="result-count">4 hasil</p>
+            </div>
+            <div class="table-scroll" role="region" tabindex="0" aria-label="Daftar buku contoh" id="demo-results">
+                <table class="demo-table">
+                    <thead><tr><th scope="col">Judul</th><th scope="col">Topik</th><th scope="col">Rak</th><th scope="col">Status</th></tr></thead>
+                    <tbody>
+                        <tr data-status="available"><td class="primary-cell">Dasar Basis Data</td><td>Teknologi</td><td>A-01</td><td><span class="status">Tersedia</span></td></tr>
+                        <tr data-status="borrowed"><td class="primary-cell">Catatan dari Kebun Kota</td><td>Lingkungan</td><td>B-02</td><td><span class="status status-due">Dipinjam</span></td></tr>
+                        <tr data-status="available"><td class="primary-cell">Peta dan Cerita Nusantara</td><td>Sejarah</td><td>C-01</td><td><span class="status">Tersedia</span></td></tr>
+                        <tr data-status="borrowed"><td class="primary-cell">Belajar Statistik Dasar</td><td>Matematika</td><td>A-02</td><td><span class="status status-due">Dipinjam</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="empty-results" hidden>
+                <h2>Buku tidak ditemukan</h2>
+                <p>Coba kata kunci lain atau ubah filter ketersediaan.</p>
+            </div>
+        </section>
+    </main>
+    <script>
+        const form = document.querySelector('#demo-search');
+        const search = document.querySelector('#search');
+        const filters = [...document.querySelectorAll('[data-filter]')];
+        const rows = [...document.querySelectorAll('[data-status]')];
+        const count = document.querySelector('#result-count');
+        const results = document.querySelector('#demo-results');
+        const empty = document.querySelector('#empty-results');
+        let filter = 'all';
+
+        function updateResults() {
+            const query = search.value.trim().toLowerCase();
+            let visible = 0;
+            for (const row of rows) {
+                const matchesText = [row.cells[0], row.cells[1]].some(cell => cell.textContent.toLowerCase().includes(query));
+                row.hidden = !matchesText || (filter !== 'all' && row.dataset.status !== filter);
+                if (!row.hidden) visible += 1;
+            }
+            count.textContent = visible + ' hasil';
+            results.hidden = visible === 0;
+            empty.hidden = visible !== 0;
+        }
+
+        for (const button of filters) {
+            button.addEventListener('click', () => {
+                filter = button.dataset.filter;
+                for (const option of filters) option.setAttribute('aria-pressed', String(option === button));
+                updateResults();
+            });
+        }
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            updateResults();
+        });
+        search.addEventListener('input', updateResults);
+        for (const control of [...form.elements, ...filters]) control.disabled = false;
+    </script>
+</body>
+</html>
